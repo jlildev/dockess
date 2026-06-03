@@ -1,0 +1,28 @@
+# Local Environment settings
+.env
+.manager_port
+manager.log
+
+# Python cache and bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# PyInstaller / Compiled binaries
+build/
+dist/
+wp-manager.spec
+*.spec
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# WordPress source directory (auto-created and populated on first run)
+src/

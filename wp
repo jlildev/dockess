@@ -1,0 +1,23 @@
+#!/bin/bash
+# Add common user bin paths to PATH
+for path in "$HOME/.local/bin" "$HOME/bin"; do
+  if [ -d "$path" ] && [[ ":$PATH:" != *":$path:"* ]]; then
+    export PATH="$path:$PATH"
+  fi
+done
+
+# Detect docker-compose or docker compose
+if command -v docker-compose >/dev/null 2>&1; then
+  DOCKER_COMPOSE="docker-compose"
+elif command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+  DOCKER_COMPOSE="docker compose"
+else
+  echo "Error: Neither 'docker-compose' nor 'docker compose' was found in PATH." >&2
+  exit 1
+fi
+
+# Get the directory of this script
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+# Run the wp-cli command inside the php container as the www-data user
+$DOCKER_COMPOSE -f "$DIR/docker-compose.yml" exec -u www-data php wp "$@"

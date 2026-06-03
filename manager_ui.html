@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordPress Multisite Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #fab283; /* Warm Orange */
+            --primary-hover: #e5a377;
+            --success: #7fd88f; /* Green */
+            --danger: #e06c75; /* Red */
+            --info: #5c9cf5; /* Blue */
+            --bg-dark: #0b0b0d;
+            --card-bg: #0d0d10;
+            --text-main: #f4f4f5;
+            --text-muted: #8e8b8b;
+            --border: #211e1e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: #0a0a0c;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        }
+
+        header {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-logo {
+            font-family: monospace;
+            background: var(--primary);
+            color: #0b0b0d;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 2px;
+            letter-spacing: -0.5px;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .header-links a {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .header-links a:hover {
+            color: var(--text-main);
+            border-color: #565656;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            border-radius: 4px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-family: monospace;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dotted var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Form styling */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: #070709;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 0.65rem 0.85rem;
+            color: var(--text-main);
+            font-family: monospace;
+            font-size: 0.85rem;
+            transition: all 0.15s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Button styles */
+        .btn {
+            font-family: monospace;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.7rem 1.2rem;
+            border-radius: 3px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            width: 100%;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-main);
+        }
+
+        .btn-success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+        .btn-success:hover {
+            background: var(--success);
+            color: #0b0b0d;
+        }
+
+        .btn-danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        .btn-danger:hover {
+            background: var(--danger);
+            color: #0b0b0d;
+        }
+
+        .btn-primary {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .btn-primary:hover {
+            background: var(--primary);
+            color: #0b0b0d;
+        }
+
+        .btn-info {
+            border-color: var(--info);
+            color: var(--info);
+        }
+        .btn-info:hover {
+            background: var(--info);
+            color: #0b0b0d;
+        }
+
+        .btn-muted {
+            border-color: var(--text-muted);
+            color: var(--text-muted);
+        }
+        .btn-muted:hover {
+            background: var(--text-muted);
+            color: #0b0b0d;
+        }
+
+        .btn:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+
+        /* Operations Container */
+        .status-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 0.85rem;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .status-badge.stopped {
+            color: var(--danger);
+            border-color: rgba(224, 108, 117, 0.25);
+            background: rgba(224, 108, 117, 0.03);
+        }
+
+        .status-badge.running {
+            color: var(--success);
+            border-color: rgba(127, 216, 143, 0.25);
+            background: rgba(127, 216, 143, 0.03);
+        }
+
+        /* Console log */
+        .logs-card {
+            margin-top: 1rem;
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .console-title {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .console-container {
+            background: #050507;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 0.85rem 1rem;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.8rem;
+            color: var(--success);
+            height: 190px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0c0c0e;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 0.75rem 1.25rem;
+            color: var(--text-main);
+            font-family: monospace;
+            font-size: 0.8rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+            animation: slide-in 0.2s ease;
+        }
+
+        @keyframes slide-in {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Help Box styling for Port 80 */
+        .help-box {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border: 1px dashed var(--border);
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.01);
+            line-height: 1.4;
+        }
+        .help-box summary {
+            font-weight: bold;
+            outline: none;
+        }
+        .help-box code {
+            color: var(--primary);
+            background: rgba(250, 178, 131, 0.1);
+            padding: 0.1rem 0.35rem;
+            border-radius: 2px;
+            font-size: 0.72rem;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="brand-container">
+            <span class="brand-logo">WP</span>
+            <h1>Multisite Manager</h1>
+        </div>
+        <div class="header-links">
+            <a href="/walkthrough.md" target="_blank">Docs</a>
+        </div>
+    </header>
+
+    <div class="dashboard-grid">
+        <!-- Status & Operations Card -->
+        <div class="card actions-card">
+            <div class="card-title">Operations</div>
+            
+            <div class="status-container">
+                <div id="statusBadge" class="status-badge stopped">
+                    <span>[-]</span>
+                    <span id="statusText">STOPPED</span>
+                </div>
+                
+                <button id="startBtn" class="btn btn-success" onclick="startStack()">[ Start Stack ]</button>
+                <button id="stopBtn" class="btn btn-danger" onclick="stopStack()">[ Stop Stack ]</button>
+                <a id="openBtn" href="#" target="_blank" class="btn btn-info" style="display: none;">[ Open WordPress Dashboard ]</a>
+                <button id="shutdownBtn" class="btn btn-muted" onclick="shutdownPanel()">[ Shutdown Panel ]</button>
+            </div>
+        </div>
+
+        <!-- Configurations Card -->
+        <div class="card">
+            <div class="card-title">Settings</div>
+            <form id="configForm" onsubmit="saveConfig(event)">
+                <div class="form-group">
+                    <label for="WP_DOMAIN">LOCAL DOMAIN</label>
+                    <input type="text" id="WP_DOMAIN" name="WP_DOMAIN" required placeholder="e.g., localhost, wp.localhost">
+                </div>
+                <div class="form-group">
+                    <label for="WP_PORT">LOCAL PORT</label>
+                    <input type="number" id="WP_PORT" name="WP_PORT" required>
+                    <span style="font-size: 0.72rem; font-family: monospace; display: block; margin-top: 0.35rem;">
+                        <a href="#port80-details" onclick="scrollToPort80(event)" style="color: var(--primary); text-decoration: none; border-bottom: 1px dotted var(--primary);">[ How to run on port 80? ]</a>
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label for="WP_TITLE">SITE TITLE</label>
+                    <input type="text" id="WP_TITLE" name="WP_TITLE" required>
+                </div>
+                <div class="form-group">
+                    <label for="WP_ADMIN_USER">ADMIN USERNAME</label>
+                    <input type="text" id="WP_ADMIN_USER" name="WP_ADMIN_USER" required>
+                </div>
+                <div class="form-group">
+                    <label for="WP_ADMIN_PASSWORD">ADMIN PASSWORD</label>
+                    <input type="text" id="WP_ADMIN_PASSWORD" name="WP_ADMIN_PASSWORD" required>
+                </div>
+                <div class="form-group">
+                    <label for="WP_ADMIN_EMAIL">ADMIN EMAIL</label>
+                    <input type="email" id="WP_ADMIN_EMAIL" name="WP_ADMIN_EMAIL" required>
+                </div>
+                <button type="submit" class="btn btn-primary">[ Save Configuration ]</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- System Logs -->
+    <div class="card logs-card">
+        <div class="card-title">System Logs</div>
+        <div id="console" class="console-container">No activity logged. Click 'Start' to deploy the environment.</div>
+    </div>
+
+    <!-- Port 80 Details -->
+    <div id="port80-details" class="card" style="margin-top: 2rem; transition: border-color 0.3s ease;">
+        <div class="card-title">Port 80 Binding Instructions</div>
+        <div style="font-family: monospace; font-size: 0.8rem; line-height: 1.6; color: var(--text-muted);">
+            <p style="margin-top: 0;">If you want to run WordPress Multisite directly on port 80 (e.g. access as <code>http://wp.localhost</code> without appending a port number), you may need to authorize your system to bind to privileged ports:</p>
+            
+            <div style="margin-bottom: 1.25rem;">
+                <strong style="color: var(--primary);">Linux (Rootless Podman / Docker)</strong><br>
+                Rootless containers cannot bind to ports below 1024 by default. Run the following command in your terminal to allow binding to port 80:
+                <pre style="background: #070709; border: 1px solid var(--border); padding: 0.75rem; border-radius: 3px; color: var(--primary); margin: 0.5rem 0; overflow-x: auto; font-size: 0.75rem;">sudo sysctl -w net.ipv4.ip_unprivileged_port_start=80</pre>
+                To make this setting persistent across reboots:
+                <pre style="background: #070709; border: 1px solid var(--border); padding: 0.75rem; border-radius: 3px; color: var(--primary); margin: 0.5rem 0; overflow-x: auto; font-size: 0.75rem;">echo "net.ipv4.ip_unprivileged_port_start=80" | sudo tee -a /etc/sysctl.d/99-podman-ports.conf</pre>
+            </div>
+            
+            <div style="margin-bottom: 1.25rem;">
+                <strong style="color: var(--primary);">Windows</strong><br>
+                Docker Desktop and WSL2 automatically handle port forwarding. If port 80 is blocked by IIS or another system process, disable it in an Administrator command prompt:
+                <pre style="background: #070709; border: 1px solid var(--border); padding: 0.75rem; border-radius: 3px; color: var(--primary); margin: 0.5rem 0; overflow-x: auto; font-size: 0.75rem;">net stop http</pre>
+            </div>
+            
+            <div>
+                <strong style="color: var(--primary);">macOS</strong><br>
+                Docker Desktop maps port 80 automatically. Ensure the built-in macOS Apache server is stopped:
+                <pre style="background: #070709; border: 1px solid var(--border); padding: 0.75rem; border-radius: 3px; color: var(--primary); margin: 0.5rem 0; overflow-x: auto; font-size: 0.75rem;">sudo apachectl stop</pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    let pollInterval;
+    let configData = {};
+
+    // Initial load
+    window.addEventListener('DOMContentLoaded', () => {
+        loadConfig();
+        checkStatus();
+        loadLogs();
+        
+        // Poll status and logs
+        setInterval(checkStatus, 3000);
+        setInterval(loadLogs, 5000);
+    });
+
+    function scrollToPort80(e) {
+        e.preventDefault();
+        const el = document.getElementById('port80-details');
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+            // Glow effect
+            el.style.borderColor = 'var(--primary)';
+            el.style.boxShadow = '0 0 15px rgba(250, 178, 131, 0.2)';
+            setTimeout(() => {
+                el.style.borderColor = 'var(--border)';
+                el.style.boxShadow = 'none';
+            }, 2000);
+        }
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    }
+
+    async function loadConfig() {
+        try {
+            const res = await fetch('/api/config');
+            configData = await res.json();
+            
+            // Populate form fields
+            for (const key in configData) {
+                const el = document.getElementById(key);
+                if (el) el.value = configData[key];
+            }
+            updateOpenButtonLink();
+        } catch (err) {
+            console.error('Failed to load config', err);
+        }
+    }
+
+    function updateOpenButtonLink() {
+        const domain = document.getElementById('WP_DOMAIN').value || 'localhost';
+        const port = document.getElementById('WP_PORT').value || '8080';
+        const openBtn = document.getElementById('openBtn');
+        openBtn.href = `http://${domain}:${port}/wp-admin`;
+    }
+
+    async function saveConfig(e) {
+        e.preventDefault();
+        const formData = new FormData(document.getElementById('configForm'));
+        const data = { ...configData };
+        
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        // Set WP_URL dynamically based on domain and port
+        data['WP_URL'] = `http://${data['WP_DOMAIN']}:${data['WP_PORT']}`;
+
+        try {
+            const res = await fetch('/api/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            showToast(result.message);
+            updateOpenButtonLink();
+        } catch (err) {
+            showToast('Error saving configuration.');
+        }
+    }
+
+    async function checkStatus() {
+        try {
+            const res = await fetch('/api/status');
+            const data = await res.json();
+            
+            const badge = document.getElementById('statusBadge');
+            const text = document.getElementById('statusText');
+            const openBtn = document.getElementById('openBtn');
+            const startBtn = document.getElementById('startBtn');
+
+            if (data.running) {
+                badge.className = 'status-badge running';
+                text.textContent = 'RUNNING';
+                badge.firstElementChild.textContent = '[*]';
+                openBtn.style.display = 'inline-flex';
+                startBtn.textContent = '[ Rebuild & Start ]';
+            } else {
+                badge.className = 'status-badge stopped';
+                text.textContent = 'STOPPED';
+                badge.firstElementChild.textContent = '[-]';
+                openBtn.style.display = 'none';
+                startBtn.textContent = '[ Start Stack ]';
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function loadLogs() {
+        try {
+            const res = await fetch('/api/logs');
+            const data = await res.json();
+            const consoleBox = document.getElementById('console');
+            consoleBox.textContent = data.logs || "No logs available.";
+            // Auto scroll to bottom
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function startStack() {
+        showToast('Starting containers... this might take a few moments.');
+        try {
+            const res = await fetch('/api/start', { method: 'POST' });
+            const data = await res.json();
+            showToast(data.message);
+            checkStatus();
+        } catch (err) {
+            showToast('Failed to trigger start command.');
+        }
+    }
+
+    async function stopStack() {
+        showToast('Stopping stack...');
+        try {
+            const res = await fetch('/api/stop', { method: 'POST' });
+            const data = await res.json();
+            showToast(data.message);
+            checkStatus();
+        } catch (err) {
+            showToast('Failed to trigger stop command.');
+        }
+    }
+
+    async function shutdownPanel() {
+        if (confirm("Are you sure you want to shut down the Control Panel? This will stop the manager UI but leave your running containers active.")) {
+            try {
+                const res = await fetch('/api/shutdown', { method: 'POST' });
+                const data = await res.json();
+                showToast(data.message);
+                setTimeout(() => {
+                    document.body.innerHTML = `
+                        <div style="text-align: center; margin-top: 100px; font-family: monospace;">
+                            <h1 style="color: var(--primary); font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;">[ CONTROL PANEL SHUTDOWN ]</h1>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">The manager server process has terminated. You can close this browser tab.</p>
+                        </div>
+                    `;
+                }, 1000);
+            } catch (err) {
+                showToast('Failed to shut down manager.');
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

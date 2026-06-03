@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=WP Multisite Manager
+Comment=Manage WordPress Multisite Docker Stack
+Exec=/home/jlil/wordpress-docker/start.sh
+Icon=network-server
+Path=/home/jlil/wordpress-docker
+Terminal=false
+Categories=Development;
