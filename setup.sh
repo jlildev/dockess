@@ -26,6 +26,22 @@ else
   exit 1
 fi
 
+# Dynamically configure/update desktop launcher shortcut
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cat <<EOF > "$DIR/wp-manager.desktop"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=WP Multisite Manager
+Comment=Manage WordPress Multisite Docker Stack
+Exec=$DIR/start.sh
+Icon=network-server
+Path=$DIR
+Terminal=false
+Categories=Development;
+EOF
+chmod +x "$DIR/wp-manager.desktop"
+
 echo -e "${BLUE}=== Starting WordPress Multisite Setup ===${NC}"
 
 # Ensure source directory exists

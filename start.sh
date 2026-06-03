@@ -8,6 +8,22 @@ for path in "$HOME/.local/bin" "$HOME/bin"; do
   fi
 done
 
+# Dynamically configure/update desktop launcher shortcut
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cat <<EOF > "$DIR/wp-manager.desktop"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=WP Multisite Manager
+Comment=Manage WordPress Multisite Docker Stack
+Exec=$DIR/start.sh
+Icon=network-server
+Path=$DIR
+Terminal=false
+Categories=Development;
+EOF
+chmod +x "$DIR/wp-manager.desktop"
+
 echo "Starting WordPress Multisite Manager..."
 
 # Start browser opener in the background. It will wait for the manager to write its port.
