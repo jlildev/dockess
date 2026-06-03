@@ -42,6 +42,22 @@ Categories=Development;
 EOF
 chmod +x "$DIR/wp-manager.desktop"
 
+# Load environment variables from .env if it exists
+if [ -f .env ]; then
+  export $(grep -v '^#' .env | xargs)
+fi
+
+# Set defaults if environment variables are not loaded/defined
+DB_NAME=${DB_NAME:-"wordpress"}
+DB_USER=${DB_USER:-"wpuser"}
+DB_PASSWORD=${DB_PASSWORD:-"wppassword"}
+DB_HOST=${DB_HOST:-"db"}
+WP_URL=${WP_URL:-"http://localhost:8080"}
+WP_TITLE=${WP_TITLE:-"WordPress Multisite"}
+WP_ADMIN_USER=${WP_ADMIN_USER:-"admin"}
+WP_ADMIN_PASSWORD=${WP_ADMIN_PASSWORD:-"adminpassword"}
+WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL:-"admin@example.com"}
+
 echo -e "${BLUE}=== Starting WordPress Multisite Setup ===${NC}"
 
 # Ensure source directory exists
@@ -57,7 +73,7 @@ wait_for_db() {
   local max_attempts=30
   local attempt=1
   while [ $attempt -le $max_attempts ]; do
-    if $DOCKER_COMPOSE exec -T db mysqladmin ping -h"localhost" -u"wpuser" -p"wppassword" --silent >/dev/null 2>&1; then
+    if $DOCKER_COMPOSE exec -T db mysqladmin ping -h"localhost" -u"$DB_USER" -p"$DB_PASSWORD" --silent >/dev/null 2>&1; then
       echo -e "${GREEN}Database is ready!${NC}"
       return 0
     fi
@@ -80,24 +96,24 @@ else
 
   echo -e "${YELLOW}Creating wp-config.php...${NC}"
   $DOCKER_COMPOSE exec -T php wp config create \
-    --dbname=wordpress \
-    --dbuser=wpuser \
-    --dbpass=wppassword \
-    --dbhost=db \
+    --dbname="$DB_NAME" \
+    --dbuser="$DB_USER" \
+    --dbpass="$DB_PASSWORD" \
+    --dbhost="$DB_HOST" \
     --allow-root
 
   echo -e "${YELLOW}Installing WordPress...${NC}"
   $DOCKER_COMPOSE exec -T php wp core install \
-    --url="http://localhost:8080" \
-    --title="WordPress Multisite" \
-    --admin_user="admin" \
-    --admin_password="adminpassword" \
-    --admin_email="admin@example.com" \
+    --url="$WP_URL" \
+    --title="$WP_TITLE" \
+    --admin_user="$WP_ADMIN_USER" \
+    --admin_password="$WP_ADMIN_PASSWORD" \
+    --admin_email="$WP_ADMIN_EMAIL" \
     --allow-root
 
   echo -e "${YELLOW}Converting to Multisite (Subdirectory)...${NC}"
   $DOCKER_COMPOSE exec -T php wp core multisite-convert \
-    --title="WordPress Multisite Network" \
+    --title="$WP_TITLE" \
     --allow-root
 
   # Fix permissions so wp-content and source files are fully writeable by php-fpm (www-data) and host user
@@ -108,9 +124,9 @@ else
 fi
 
 echo -e "\n${GREEN}==================================================${NC}"
-echo -e "${GREEN}  WordPress Multisite is ready at: http://localhost:8080${NC}"
-echo -e "${GREEN}  Admin Dashboard: http://localhost:8080/wp-admin${NC}"
-echo -e "${GREEN}  Username: admin${NC}"
-echo -e "${GREEN}  Password: adminpassword${NC}"
+echo -e "${GREEN}  WordPress Multisite is ready at: $WP_URL${NC}"
+echo -e "${GREEN}  Admin Dashboard: $WP_URL/wp-admin${NC}"
+echo -e "${GREEN}  Username: $WP_ADMIN_USER${NC}"
+echo -e "${GREEN}  Password: $WP_ADMIN_PASSWORD${NC}"
 echo -e "${GREEN}==================================================${NC}"
 echo -e "${BLUE}You can put plugins and themes directly in: ./src/wp-content/${NC}"

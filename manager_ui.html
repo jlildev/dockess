@@ -362,7 +362,7 @@
             <h1>Multisite Manager</h1>
         </div>
         <div class="header-links">
-            <a href="/walkthrough.md" target="_blank">Docs</a>
+            <a href="https://github.com/jlildev/dockess#readme" target="_blank">Docs</a>
         </div>
     </header>
 
@@ -516,7 +516,17 @@
         const domain = document.getElementById('WP_DOMAIN').value || 'localhost';
         const port = document.getElementById('WP_PORT').value || '8080';
         const openBtn = document.getElementById('openBtn');
-        openBtn.href = `http://${domain}:${port}/wp-admin`;
+        
+        let url;
+        if (port === '80') {
+            url = `http://${domain}`;
+        } else if (port === '443') {
+            url = `https://${domain}`;
+        } else {
+            url = `http://${domain}:${port}`;
+        }
+        
+        openBtn.href = `${url}/wp-admin`;
     }
 
     async function saveConfig(e) {
@@ -529,7 +539,15 @@
         });
 
         // Set WP_URL dynamically based on domain and port
-        data['WP_URL'] = `http://${data['WP_DOMAIN']}:${data['WP_PORT']}`;
+        const domain = data['WP_DOMAIN'] || 'localhost';
+        const port = data['WP_PORT'] || '8080';
+        if (port === '80') {
+            data['WP_URL'] = `http://${domain}`;
+        } else if (port === '443') {
+            data['WP_URL'] = `https://${domain}`;
+        } else {
+            data['WP_URL'] = `http://${domain}:${port}`;
+        }
 
         try {
             const res = await fetch('/api/save', {
